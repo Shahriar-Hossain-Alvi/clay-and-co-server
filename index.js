@@ -30,14 +30,23 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
+    //create a database in mongoDB 
+    //DB name = artAndCraftDB, DBcollection = artAndCraft
     const artAndCraftsCollection = client.db('artAndCraftDB').collection('artAndCraft');
 
-    //create data in the DB
+    //create/send data to the DB from client side
     app.post("/craftItem", async(req, res)=>{
       const newCraftItem = req.body;
       console.log('New craft item added', newCraftItem);
 
       const result = await artAndCraftsCollection.insertOne(newCraftItem);
+      res.send(result);
+    })
+
+    //show data in the api link
+    app.get("/craftItem", async(req,res)=>{
+      const cursor = artAndCraftsCollection.find();
+      const result = await cursor.toArray();
       res.send(result);
     })
 
