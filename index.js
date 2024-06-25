@@ -1,7 +1,7 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
-require('dotenv').config();
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 
 const app = express();
@@ -10,6 +10,7 @@ const port = process.env.PORT || 5000;
 //middleware
 app.use(cors());
 app.use(express.json());
+
 
 
 // start mongoDB
@@ -27,15 +28,13 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
 
     //create a database in mongoDB 
     //DB name = artAndCraftDB, DBcollection = artAndCraft
     const artAndCraftsCollection = client.db('artAndCraftDB').collection('artAndCraft');
 
     //create/send data to the DB from client side
-    app.post("/craftItem", async(req, res)=>{
+    app.post("/craftItem", async (req, res) => {
       const newCraftItem = req.body;
       console.log('New craft item added', newCraftItem);
 
@@ -44,9 +43,27 @@ async function run() {
     })
 
     //show data in the api link
-    app.get("/craftItem", async(req,res)=>{
+    app.get("/craftItem", async (req, res) => {
       const cursor = artAndCraftsCollection.find();
       const result = await cursor.toArray();
+      res.send(result);
+    })
+
+    //show a specific user in the api link
+    app.get("/craftItem/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await artAndCraftsCollection.findOne(query);
+      res.send(result);
+    })
+
+    //delete an item
+    app.delete('/craftItem/:id', async(req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      //delete a data using id
+      const query = { _id: new ObjectId(id) }
+      const result = await artAndCraftsCollection.deleteOne(query);
       res.send(result);
     })
 
@@ -65,10 +82,10 @@ run().catch(console.dir);
 
 
 
-app.get('/', (req, res)=>{
-    res.send('Clay & Co. server is running');
+app.get('/', (req, res) => {
+  res.send('Clay & Co. server is running');
 })
 
-app.listen(port, ()=>{
-    console.log(`Clay & Co. server is running at port ${port}`);
+app.listen(port, () => {
+  console.log(`Clay & Co. server is running at port ${port}`);
 })
