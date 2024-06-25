@@ -58,12 +58,32 @@ async function run() {
     })
 
     //delete an item
-    app.delete('/craftItem/:id', async(req, res) => {
+    app.delete('/craftItem/:id', async (req, res) => {
       const id = req.params.id;
       console.log(id);
       //delete a data using id
       const query = { _id: new ObjectId(id) }
       const result = await artAndCraftsCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    //get the names of all subcategory
+    app.get('/subCategory', async (req, res) => {
+      const pipeline = [
+        {
+          $group: {
+            _id: '$subCategory'
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            subCategory: '$_id'
+          }
+        }
+      ];
+
+      const result = await artAndCraftsCollection.aggregate(pipeline).toArray();
       res.send(result);
     })
 
